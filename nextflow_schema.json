@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema",
+  "$id": "https://raw.githubusercontent.com/MIBI-preprocess-data/master/nextflow_schema.json",
+  "title": "MIBI-preprocess-data pipeline parameters",
+  "description": "Sub pipeline within the MIBI pipeline to preprocess output from QuPath for XGBoost model training.",
+  "type": "object",
+  "definitions": {
+    "generic_options": {
+      "title": "Generic options",
+      "type": "object",
+      "fa_icon": "fas fa-file-import",
+      "description": "Less common options for the pipeline, typically set in a config file.",
+      "help_text": "These options are common to all nf-core pipelines and allow you to customise some of the core preferences for how the pipeline runs.\n\nTypically these options would be set in a Nextflow config file loaded for all pipeline runs, such as `~/.nextflow/config`.",
+      "properties": {
+        "help": {
+          "type": "boolean",
+          "description": "Display help text.",
+          "fa_icon": "fas fa-question-circle",
+          "hidden": true
+        },
+        "version": {
+          "type": "boolean",
+          "description": "Display version and exit.",
+          "fa_icon": "fas fa-question-circle",
+          "hidden": true,
+          "default": 0.1
+        }
+      }
+    }
+  },
+  "allOf": [
+    {
+      "$ref": "#/definitions/generic_options"
+    }
+  ],
+  "properties": {
+    "batch_name": {
+      "type": "string",
+      "description": "Batch name used to label output files."
+    },
+    "output_folder": {
+      "type": "string",
+      "description": "Where preprocessed files will be stored. The folder will be created if it doesn't already exist."
+    },
+    "input_data": {
+      "type": "string",
+      "description": "The raw data exported from QuPath to be preprocessed."
+    },
+    "cell_types_to_remove": {
+      "type": "string",
+      "description": "A comma-delimited list of cell types identified that you wish to remove. E.g., \"B cells,CD4 T cells\"."
+    },
+    "change_to": {
+      "type": "string",
+      "default": "Other",
+      "description": "The label assigned to celltypes that you have flagged for removal. Default: Other."
+    },
+    "additional_meta_data": {
+      "type": "string",
+      "description": "A comma-delimited list of additional metadata columns you wish to keep."
+    },
+    "unwanted_markers": {
+      "type": "string",
+      "description": "A comma-delimited list of markers you want to remove from the phenotyping."
+    },
+    "unwanted_compartments": {
+      "type": "string",
+      "description": "A comma-delimited list of compartments you want to remove from the phenotyping."
+    },
+    "unwanted_statistics": {
+      "type": "string",
+      "description": "A comma-delimited list of statistics you want to remove from the phenotyping."
+    },
+    "preprocess_script": {
+      "type": "string",
+      "default": "/Users/yang.e/mibi-preprocess-data/scripts/preprocess-training-data.py",
+      "description": "That path where the preprocess script is located."
+    },
+    "cpus": {
+      "type": "integer",
+      "default": 1,
+      "hidden": true
+    },
+    "container": {
+      "type": "string",
+      "default": "quay.io/biocontainers/pandas:1.4.3",
+      "hidden": true
+    }
+  },
+  "required": ["batch_name", "output_folder", "input_data"]
+}
