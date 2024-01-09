@@ -3,8 +3,7 @@
 nextflow.enable.dsl=2
 
 // Import subworkflows to be run in the workflow
-include { processOne } from './modules/process1'
-include { processTwo } from './modules/process2'
+include { PREPROCESS } from './modules/preprocess-process'
 
 /// Print a header
 log.info """\
@@ -33,6 +32,7 @@ change_to             : ${params.change_to}
 unwanted_markers      : ${params.unwanted_markers}
 unwanted_compartments : ${params.unwanted_compartments}
 unwanted_statistics   : ${params.unwanted_statistics}
+preprocess_script     : ${params.preprocess_script}
 workDir               : ${workflow.workDir}
 =======================================================================================
 
@@ -87,14 +87,8 @@ workflow {
 
 	// if none of the above are a problem, then run the workflow
 	} else {
-		
-		// Define input channels 
-
-		// Run process 1 example
-		processOne(params.qupath_data)
-		
-		// process 2 example 
-		processTwo(processOne.out.File)
+		// Run preprocessing process
+		file = PREPROCESS(params.qupath_data)
 	}
 }
 
