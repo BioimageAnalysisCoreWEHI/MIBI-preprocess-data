@@ -8,26 +8,17 @@ import re
 import os
 import json
 
-def print_1d_list_as_md_table(input_list, columns=3):
+def list_2_md_table(input_list, columns=3) -> str:
     """
-    Convert a 1D list to a 2D list with the specified number of columns.
-
-    :param input_list: The 1D list to be converted.
-    :param columns: The number of columns in the resulting 2D list.
-    :return: A 2D list where each inner list represents a row.
+    Convert a 1D list to a markdown table with specified no. of columns.
     """
 
     # could've used if input_list, but input_list might be a pandas series
     if len(input_list) > 0:
-
         list2 = [input_list[i:i + columns] for i in range(0, len(input_list), columns)]
-
-        print(tabulate.tabulate(list2))
-        print()
-
+        return tabulate.tabulate(list2)
     else:
-
-        print(None, "\n")
+        return str(None)
 
 def setup(output_folder, expression_mat_path):
     os.makedirs(output_folder, exist_ok=True)
@@ -49,17 +40,18 @@ def preprocess_celltypecolumn(expression_df, cell_types_to_remove = ["Unknown"],
     expression_df.loc[:, "Name"] = expression_df.loc[:, "Name"].str.replace("Immune cells: ", "")
 
     found_cell_types = sorted(expression_df.loc[:, "Class"].unique())
-    print("## Cell types found:\n")
-    print_1d_list_as_md_table(found_cell_types)
 
+    print(f"## Cell types found:\n\n",
+        list_2_md_table(found_cell_types), "\n\n", sep="")
+    
     expression_df.loc[:, "Class"] = expression_df.loc[:, "Class"].replace(cell_types_to_remove, change_to)
     expression_df.loc[:, "Name"] = expression_df.loc[:, "Name"].replace(cell_types_to_remove, change_to)
 
     cell_types = expression_df.loc[:, "Class"].unique()
     cell_types = sorted(cell_types)
 
-    print("## Cell types after removing user-defined cells:\n")
-    print_1d_list_as_md_table(cell_types)
+    print(f"## Cell types after removing user-defined cells:\n\n",
+        list_2_md_table(cell_types), "\n\n", sep="")
 
     return cell_types
 
@@ -212,8 +204,8 @@ def preprocess_training_data(batch_name, output_folder, expression_mat_path, cel
 
     encoder, decoder = create_encoder_decoder(cell_types, output_folder, batch_name)
 
-    print("## Encoding:\n")
-    print(tabulate.tabulate([[k] for k in encoder.keys()], showindex="always"), '\n')
+    print("## Encoding:\n\n",
+        tabulate.tabulate([[k] for k in encoder.keys()], showindex="always"), "\n\n", sep="")
 
     save_encoded_labels(expression_df, encoder, output_folder, batch_name)
 
@@ -221,17 +213,17 @@ def preprocess_training_data(batch_name, output_folder, expression_mat_path, cel
 
     save_image_coordinate_columns(expression_df, additional_meta_data_to_keep, output_folder, batch_name)
 
-    print("## Count of each cell type:\n")
-    print(expression_df.loc[:, "Class"].value_counts().to_markdown(tablefmt="simple"), '\n')
+    print("## Count of each cell type:\n\n",
+        expression_df.loc[:, "Class"].value_counts().to_markdown(tablefmt="simple"), "\n\n", sep="")
 
     remove_prefixes_underscores(expression_df)
 
     markers = collect_markers(expression_df)
 
-    print("## Markers found:\n")
-    print_1d_list_as_md_table(markers)
-    print("## User-defined markers to remove:\n")
-    print_1d_list_as_md_table(unwanted_markers)
+    print("## Markers found:\n\n",
+        list_2_md_table(markers), "\n\n",
+        "## User-defined markers to remove:\n\n",
+        list_2_md_table(unwanted_markers), "\n\n", sep="")
 
     expression_df = drop_markers(expression_df, markers, unwanted_markers)
 
@@ -242,8 +234,8 @@ def preprocess_training_data(batch_name, output_folder, expression_mat_path, cel
     expression_df = remove_unwanted_compartments(expression_df, unwanted_compartments)
 
     expression_df = remove_statistics(expression_df, unwanted_statistics)
-    print("## Columns with NA values:\n")
-    print_1d_list_as_md_table(expression_df.columns[expression_df.isna().any()].values, 2)
+    print("## Columns with NA values:\n\n",
+        list_2_md_table(expression_df.columns[expression_df.isna().any()].values, 2), "\n\n", sep="")
 
     print(
     """## If there are columns with NA values:
@@ -323,27 +315,26 @@ The data will be exported for XGBoost training or any supervised machine learnin
     except:
         unwanted_statistics = []
 
-    print("# ------------------ Input summary -----------------")
-    print("## Batch name:\n")
-    print(batch_name, "\n")
-    print("## Output folder:\n")
-    print(f"```\n{output_folder}\n```\n")
-    print("## QuPath data to be preprocessed:\n") 
-    print(f"```\n{expression_mat_path}\n```\n")
-    print("## Unwanted cell types:\n") 
-    print_1d_list_as_md_table(cell_types_to_remove)
-    print("## Changing unwanted cell types to:\n") 
-    print(change_to, "\n")
-    print("## Additional metadata to keep:\n") 
-    print_1d_list_as_md_table(additional_meta_data_to_keep)
-    print("## Unwanted makers:\n") 
-    print_1d_list_as_md_table(unwanted_markers)
-    print("## Unwanted compartments:\n") 
-    print_1d_list_as_md_table(unwanted_compartments)
-    print("## Unwanted statistics:\n")
-    print_1d_list_as_md_table(unwanted_statistics)
-    print("# ---------- Starting preprocessing ... -----------")
-    print()
+    print("# ------------------ Input summary -----------------\n\n",
+        "## Batch name:\n\n",
+        batch_name, "\n\n",
+        "## Output folder:\n\n",
+        f"```\n{output_folder}\n```\n\n",
+        "## QuPath data to be preprocessed:\n\n",
+        f"```\n{expression_mat_path}\n```\n\n",
+        "## Unwanted cell types:\n\n",
+        list_2_md_table(cell_types_to_remove), "\n\n",
+        "## Changing unwanted cell types to:\n\n",
+        change_to, "\n\n",
+        "## Additional metadata to keep:\n\n",
+        list_2_md_table(additional_meta_data_to_keep), "\n\n",
+        "## Unwanted makers:\n\n",
+        list_2_md_table(unwanted_markers), "\n\n",
+        "## Unwanted compartments:\n\n",
+        list_2_md_table(unwanted_compartments), "\n\n",
+        "## Unwanted statistics:\n\n",
+        list_2_md_table(unwanted_statistics), "\n\n",
+        "# ---------- Starting preprocessing ... -----------\n\n", sep="")
 
     preprocess_training_data(batch_name, 
                              output_folder, 
