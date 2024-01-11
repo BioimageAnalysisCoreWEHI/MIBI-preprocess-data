@@ -9,6 +9,7 @@ process PREPROCESS {
 	publishDir "${params.output_folder}", mode: 'copy'
 	conda "tabulate quarto python pandas=1.4.4"
 	memory "${params.memory}"
+	beforeScript "${params.before_script}"
 
 	// See: https://www.nextflow.io/docs/latest/process.html#inputs
 	// each input needs to be placed on a new line

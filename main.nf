@@ -69,6 +69,8 @@ def helpMessage() {
         A comma-delimited list of statistics you want to remove from the phenotyping.
   --memory
         The RAM to allocate for the preprocessing. Include units e.g. "2 GB"
+  --before_script
+        Command or script to run before the process runs e.g. to make conda available.
 	
 """.stripIndent()
 }
