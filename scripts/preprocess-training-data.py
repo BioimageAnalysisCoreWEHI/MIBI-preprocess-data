@@ -342,7 +342,9 @@ The data will be exported for XGBoost training or any supervised machine learnin
 
     # print summary
     print(
-f"""# ------------------ Input summary -----------------
+f"""# Input Summary
+
+---
 
 ## Batch name:
 
@@ -384,7 +386,10 @@ f"""# ------------------ Input summary -----------------
 
 {list_2_md_table(unwanted_statistics)}
 
-# ---------- Starting preprocessing ... -----------
+# Results
+
+---
+
 """)
 
     preprocess_training_data(batch_name, 
