@@ -7,6 +7,7 @@ import tabulate
 import re
 import os
 import json
+import datetime
 
 def list_2_md_table(input_list, columns=3) -> str:
     """
@@ -342,9 +343,18 @@ The data will be exported for XGBoost training or any supervised machine learnin
 
     # print summary
     print(
-f"""# Input Summary
-
+f"""
 ---
+title: MIBI data preprocessing summary report
+date: {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
+format:
+  html:
+    number-sections: true
+    embed-resources: true
+    theme: cosmo
+---
+
+# Input Summary
 
 ## Batch name:
 
