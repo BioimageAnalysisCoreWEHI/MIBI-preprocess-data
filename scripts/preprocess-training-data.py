@@ -93,12 +93,12 @@ def create_encoder_decoder(cell_types, output_folder, batch_name):
     # decoder for decoding the results of the model. Save somewhere safe.
     decoder = {i: cell_types[i] for i in range(len(cell_types))}
 
-    decoder_output_path = os.path.join(output_folder, f"{batch_name}_decoder.json")
-
-    with open(decoder_output_path, "w") as json_file:
+    with open(
+        os.path.join(output_folder, f"{batch_name}_decoder.json"), "w"
+    ) as json_file:
         json.dump(decoder, json_file, indent=4)
 
-    return encoder, decoder, decoder_output_path
+    return encoder, decoder
 
 
 def save_encoded_labels(expression_df, encoder, output_folder, batch_name):
@@ -111,7 +111,6 @@ def save_encoded_labels(expression_df, encoder, output_folder, batch_name):
     labels = labels.replace({"Name": encoder})
     labels.to_csv(filename, index=False)
 
-    return filename
 
 def convert_pixels_to_micrometre(expression_df, pixel_size=0.3906):
     """
@@ -156,7 +155,6 @@ def save_image_coordinate_columns(
     )
     image_coord_df.to_csv(image_coord_file_name, index=False)
 
-    return image_coord_file_name
 
 def remove_prefixes_underscores(expression_df):
     """
@@ -274,7 +272,6 @@ def save_preprocessed_data(expression_df, output_folder, batch_name):
     )
     expression_df.to_csv(output_expression_df_path, index=False)
 
-    return output_expression_df_path
 
 def preprocess_training_data(
     batch_name,
@@ -293,7 +290,7 @@ def preprocess_training_data(
         expression_df, cell_types_to_remove, change_to
     )
 
-    encoder, decoder, decoder_output_path = create_encoder_decoder(cell_types, output_folder, batch_name)
+    encoder, decoder = create_encoder_decoder(cell_types, output_folder, batch_name)
 
     print(
         f"""## Encoding:
@@ -303,11 +300,11 @@ def preprocess_training_data(
 """
     )
 
-    cell_type_labels_path = save_encoded_labels(expression_df, encoder, output_folder, batch_name)
+    save_encoded_labels(expression_df, encoder, output_folder, batch_name)
 
     convert_pixels_to_micrometre(expression_df)
 
-    images_path = save_image_coordinate_columns(
+    save_image_coordinate_columns(
         expression_df, additional_meta_data_to_keep, output_folder, batch_name
     )
 
@@ -365,26 +362,10 @@ Some things to check:
     * You can either change the names of the columns (best option) or if the channel names were
     completely different and you don't know which corresponds to which, you should re run the segmentation
     using the new channel names. 
-
 """
     )
 
-    output_df_path = save_preprocessed_data(expression_df, output_folder, batch_name)
-
-    print(f"""
-
-# Output Paths
-
-Cell type labels: `{cell_type_labels_path}`
-
-Image list: `{images_path}`
-
-Preprocessed data: `{output_df_path}`
-
-Decoder: `{decoder_output_path}`
-
-"""
-    )
+    save_preprocessed_data(expression_df, output_folder, batch_name)
 
 
 if __name__ == "__main__":
