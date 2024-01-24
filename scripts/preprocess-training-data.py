@@ -376,8 +376,11 @@ Some things to check:
 # Output Paths
 
 Cell type labels: `{cell_type_labels_path}`
+
 Image list: `{images_path}`
+
 Preprocessed data: `{output_df_path}`
+
 Decoder: `{decoder_output_path}`
 
 """
