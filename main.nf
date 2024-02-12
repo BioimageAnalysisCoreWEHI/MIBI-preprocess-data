@@ -55,9 +55,9 @@ def helpMessage() {
 
   Optional Arguments:
 
-  --additional-metadata-to-keep ADDITIONAL_METADATA_TO_KEEP
+  --additional-metadata ADDITIONAL_METADATA
         A comma-delimited list of additional metadata columns you wish to keep.
-  --unwanted_celltypes UNWANTED_CELLTYPES
+  --cell_types_to_remove CELL_TYPES_TO_REMOVE
         A comma-delimited list of cell types identified that you wish to remove. E.g., "B cells,CD4 T cells".
   --change_to CHANGE_UNWANTED_CELLTYPES_TO
         The label assigned to celltypes that you have flagged for removal. Default: Other.
