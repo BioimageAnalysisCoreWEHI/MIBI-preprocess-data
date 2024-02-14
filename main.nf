@@ -25,7 +25,7 @@ Workflow run parameters
 =======================================================================================
 batch_name            : ${params.batch_name}
 output_folder         : ${params.output_folder}
-qupath_data           : ${params.qupath_data}
+input_data           : ${params.input_data}
 additional_meta_data  : ${params.additional_meta_data}
 cell_types_to_remove  : ${params.cell_types_to_remove}
 change_to             : ${params.change_to}
@@ -50,7 +50,7 @@ def helpMessage() {
         Batch name used to label output files.
   --output_folder OUTPUT_FOLDER
         Where preprocessed files will be stored. The folder will be created if it doesn't already exist.
-  --qupath_data QUPATH_DATA
+  --input_data QUPATH_DATA
         The raw data exported from QuPath to be preprocessed.
 
   Optional Arguments:
@@ -81,7 +81,7 @@ def helpMessage() {
 workflow {
 
 	// Show help message if --help is run or if any required params are not  provided at runtime
-	if ( params.help || params.batch_name == "" || params.output_folder == "" || params.qupath_data == ""){   
+	if ( params.help || params.batch_name == "" || params.output_folder == "" || params.input_data == ""){   
 	// Invoke the help function above and exit
 		helpMessage()
 		exit 1
@@ -93,7 +93,7 @@ workflow {
 	// if none of the above are a problem, then run the workflow
 	} else {
 		// Run preprocessing process
-		(qmd, cell_type_labels, images, results, decoder) = PREPROCESS(params.qupath_data)
+		(qmd, cell_type_labels, images, results, decoder) = PREPROCESS(params.input_data)
             // report = RENDER(qmd)
 	}
 }
