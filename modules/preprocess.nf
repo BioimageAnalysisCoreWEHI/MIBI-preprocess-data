@@ -14,30 +14,38 @@ process PREPROCESS {
 	// See: https://www.nextflow.io/docs/latest/process.html#inputs
 	// each input needs to be placed on a new line
 	input:
+	val batch_name
 	path qupath_data
+	val additional_meta_data
+	val cell_types_to_remove
+	val change_to
+	val unwanted_markers
+	val unwanted_compartments
+	val unwanted_statistics
+	path preprocess_script
 
 	// See: https://www.nextflow.io/docs/latest/process.html#outputs
 	// each new output needs to be placed on a new line
 	output:
 	path ("report.html")
-	path ("${params.batch_name}_cell_type_labels.csv")
-	path ("${params.batch_name}_images.csv")
-	path ("${params.batch_name}_preprocessed_input_data.csv")
-	path ("${params.batch_name}_decoder.json")
+	path ("${batch_name}_cell_type_labels.csv")
+	path ("${batch_name}_images.csv")
+	path ("${batch_name}_preprocessed_input_data.csv")
+	path ("${batch_name}_decoder.json")
 	
 	// this is an example of some code to run in the code block 
 	shell:
-	flag_a = params.additional_meta_data == "" ? "" : "-a '${params.additional_meta_data}'"
-	flag_l = params.cell_types_to_remove == "" ? "" : "-l '${params.cell_types_to_remove}'"
-	flag_t = params.change_to == "" ? "" : "-t '${params.change_to}'"
-	flag_m = params.unwanted_markers == "" ? "" : "-m '${params.unwanted_markers}'"
-	flag_c = params.unwanted_compartments == "" ? "" : "-c '${params.unwanted_compartments}'"
-	flag_s = params.unwanted_statistics == "" ? "" : "-s '${params.unwanted_statistics}'"
+	flag_a = additional_meta_data == "" ? "" : "-a '${additional_meta_data}'"
+	flag_l = cell_types_to_remove == "" ? "" : "-l '${cell_types_to_remove}'"
+	flag_t = change_to == "" ? "" : "-t '${change_to}'"
+	flag_m = unwanted_markers == "" ? "" : "-m '${unwanted_markers}'"
+	flag_c = unwanted_compartments == "" ? "" : "-c '${unwanted_compartments}'"
+	flag_s = unwanted_statistics == "" ? "" : "-s '${unwanted_statistics}'"
 	'''
-	python3 "!{projectDir}/scripts/preprocess-training-data.py" \\
+	python3 "!{preprocess_script}" \\
 		-d "$(realpath !{qupath_data})" \\
 		-o "$(realpath .)" \\
-		-n "!{params.batch_name}" \\
+		-n "!{batch_name}" \\
 		!{flag_a} !{flag_l} !{flag_t} !{flag_m} !{flag_m} !{flag_c} !{flag_s} \\
 		> report.qmd
 
@@ -48,25 +56,25 @@ process PREPROCESS {
 	echo "**Cell type labels:**" >> report.qmd
 	echo "" >> report.qmd
 	echo "\\`\\`\\`" >> report.qmd
-	echo "!{params.output_folder}/!{params.batch_name}_cell_type_labels.csv" >> report.qmd
+	echo "!{params.output_folder}/!{batch_name}_cell_type_labels.csv" >> report.qmd
 	echo "\\`\\`\\`" >> report.qmd
 	echo "" >> report.qmd
 	echo "**Image list:**" >> report.qmd
 	echo "" >> report.qmd
 	echo "\\`\\`\\`" >> report.qmd
-	echo "!{params.output_folder}/!{params.batch_name}_images.csv" >> report.qmd
+	echo "!{params.output_folder}/!{batch_name}_images.csv" >> report.qmd
 	echo "\\`\\`\\`" >> report.qmd
 	echo "" >> report.qmd
 	echo "**Decoder:**" >> report.qmd
 	echo "" >> report.qmd
 	echo "\\`\\`\\`" >> report.qmd
-	echo "!{params.output_folder}/!{params.batch_name}_decoder.json" >> report.qmd
+	echo "!{params.output_folder}/!{batch_name}_decoder.json" >> report.qmd
 	echo "\\`\\`\\`" >> report.qmd
 	echo "" >> report.qmd
 	echo "**Preprocessed data:**" >> report.qmd
 	echo "" >> report.qmd
 	echo "\\`\\`\\`" >> report.qmd
-	echo "!{params.output_folder}/!{params.batch_name}_preprocessed_input_data.csv" >> report.qmd
+	echo "!{params.output_folder}/!{batch_name}_preprocessed_input_data.csv" >> report.qmd
 	echo "\\`\\`\\`" >> report.qmd
 	echo "" >> report.qmd
 

@@ -25,7 +25,7 @@ Workflow run parameters
 =======================================================================================
 batch_name            : ${params.batch_name}
 output_folder         : ${params.output_folder}
-input_data           : ${params.input_data}
+input_data            : ${params.input_data}
 additional_meta_data  : ${params.additional_meta_data}
 cell_types_to_remove  : ${params.cell_types_to_remove}
 change_to             : ${params.change_to}
@@ -55,7 +55,7 @@ def helpMessage() {
 
   Optional Arguments:
 
-  --additional-metadata ADDITIONAL_METADATA
+  --additional_meta_data ADDITIONAL_METADATA
         A comma-delimited list of additional metadata columns you wish to keep.
   --cell_types_to_remove CELL_TYPES_TO_REMOVE
         A comma-delimited list of cell types identified that you wish to remove. E.g., "B cells,CD4 T cells".
@@ -93,7 +93,17 @@ workflow {
 	// if none of the above are a problem, then run the workflow
 	} else {
 		// Run preprocessing process
-		(qmd, cell_type_labels, images, results, decoder) = PREPROCESS(params.input_data)
+		(qmd, cell_type_labels, images, results, decoder) = PREPROCESS(
+                  params.batch_name,
+                  Channel.fromPath(params.input_data),
+                  params.additional_meta_data,
+                  params.cell_types_to_remove,
+                  params.change_to,
+                  params.unwanted_markers,
+                  params.unwanted_compartments,
+                  params.unwanted_statistics,
+                  Channel.fromPath(params.preprocess_script)
+            )
             // report = RENDER(qmd)
 	}
 }
