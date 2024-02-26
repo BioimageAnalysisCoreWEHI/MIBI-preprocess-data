@@ -28,6 +28,7 @@ class mibi_reporter:
             encoding_table = self.encoding_table,
             cell_type_count_table = self.cell_type_count_table,
             markers_table = self.markers_table,
+            after_drop_markers_table = self.after_drop_markers_table,
             null_columns_table = self.null_columns_table,
             warnings = self.warnings
         ))
@@ -112,9 +113,9 @@ format:
 
 {markers_table}
 
-## User-defined markers to remove:
+## Markers after removing user-defined markers:
 
-{unwanted_markers_table}
+{after_drop_markers_table}
 
 ## Columns with NA values:
 
@@ -502,9 +503,12 @@ def preprocess_training_data(
     markers = collect_markers(expression_df)
 
     output_mibi_reporter.markers_table = list_2_md_table(markers)
-    output_mibi_reporter.unwanted_markers_table = list_2_md_table(unwanted_markers)
 
     expression_df = drop_markers(expression_df, markers, unwanted_markers)
+
+    after_drop_markers = collect_markers(expression_df)
+
+    output_mibi_reporter.after_drop_markers_table = list_2_md_table(after_drop_markers)
 
     expression_df = replace_cytoplasm_with_membrane(expression_df)
 
