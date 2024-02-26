@@ -9,6 +9,128 @@ import os
 import json
 import datetime
 
+class mibi_reporter:
+    
+    def print_report(self):
+        print(self.report_template_str.format(
+            report_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            batch_name = self.batch_name,
+            output_folder = self.output_folder,
+            expression_mat_path = self.expression_mat_path,
+            cell_types_to_remove_table = self.cell_types_to_remove_table,
+            change_to = self.change_to,
+            additional_meta_data_to_keep_table = self.additional_meta_data_to_keep_table,
+            unwanted_markers_table = self.unwanted_markers_table,
+            unwanted_compartments_table = self.unwanted_compartments_table,
+            unwanted_statistics_table = self.unwanted_statistics_table,
+            found_cell_types_table = self.found_cell_types_table,
+            cell_types_table = self.cell_types_table,
+            encoding_table = self.encoding_table,
+            cell_type_count_table = self.cell_type_count_table,
+            markers_table = self.markers_table,
+            null_columns_table = self.null_columns_table
+        ))
+    def __init__(self):
+        self.report_template_str = """
+---
+title: MIBI data preprocessing summary report
+date: {report_date}
+format:
+  html:
+    number-sections: true
+    embed-resources: true
+    theme: cosmo
+---
+
+# Input Summary
+
+## Batch name:
+
+{batch_name}
+
+## Output folder:
+
+```
+{output_folder}
+```
+
+## QuPath data to be preprocessed:
+        
+```
+{expression_mat_path}
+```
+
+## Unwanted cell types:
+
+{cell_types_to_remove_table}
+
+## Changing unwanted cell types to:
+
+{change_to}
+
+## Additional metadata to keep:
+
+{additional_meta_data_to_keep_table}
+
+## Unwanted markers:
+
+{unwanted_markers_table}
+
+## Unwanted compartments:
+
+{unwanted_compartments_table}
+
+## Unwanted statistics:
+
+{unwanted_statistics_table}
+
+# Results
+
+---
+
+## Cell types found:
+
+{found_cell_types_table}
+
+## Cell types after removing user-defined cells:
+
+{cell_types_table}
+
+## Encoding:
+
+{encoding_table}
+
+## Count of each cell type:
+
+{cell_type_count_table}
+        
+## Markers found:
+
+{markers_table}
+
+## User-defined markers to remove:
+
+{unwanted_markers_table}
+
+## Columns with NA values:
+
+{null_columns_table}
+
+**If there are columns with NA values:**
+
+This will be an issue with the measurement names across different images, and cohorts. 
+If the problem is due to different measurement names across different images, this can be fixed by changing the names for the columns
+in the images where this is a problem. 
+
+Some things to check:
+
+* Do all of my images have the same channel names on QuPath?
+* Did I change the channel names before or after the segmentation? 
+    * If after, the measurements would have been created using the previous channel names.
+    * You can either change the names of the columns (best option) or if the channel names were
+    completely different and you don't know which corresponds to which, you should re run the segmentation
+    using the new channel names. 
+"""
 
 def list_2_md_table(input_list, columns=3) -> str:
     """
@@ -57,14 +179,6 @@ def preprocess_celltypecolumn(
 
     found_cell_types = sorted(expression_df.loc[:, "Class"].unique())
 
-    print(
-        f"""## Cell types found:
-
-{list_2_md_table(found_cell_types)}
-
-"""
-    )
-
     expression_df.loc[:, "Class"] = expression_df.loc[:, "Class"].replace(
         cell_types_to_remove, change_to
     )
@@ -75,15 +189,7 @@ def preprocess_celltypecolumn(
     cell_types = expression_df.loc[:, "Class"].unique()
     cell_types = sorted(cell_types)
 
-    print(
-        f"""## Cell types after removing user-defined cells:
-
-{list_2_md_table(cell_types)}
-
-"""
-    )
-
-    return cell_types
+    return found_cell_types, cell_types
 
 
 def create_encoder_decoder(cell_types, output_folder, batch_name):
@@ -308,23 +414,32 @@ def preprocess_training_data(
     additional_meta_data_to_keep,
     unwanted_markers,
     unwanted_compartments,
-    unwanted_statistics,
-):
+    unwanted_statistics
+) -> mibi_reporter:
+    
+    output_mibi_reporter = mibi_reporter()
+    output_mibi_reporter.batch_name = batch_name
+    output_mibi_reporter.output_folder = output_folder
+    output_mibi_reporter.expression_mat_path = expression_mat_path
+    output_mibi_reporter.cell_types_to_remove_table = list_2_md_table(cell_types_to_remove)
+    output_mibi_reporter.change_to = change_to
+    output_mibi_reporter.additional_meta_data_to_keep_table = list_2_md_table(additional_meta_data_to_keep)
+    output_mibi_reporter.unwanted_markers_table = list_2_md_table(unwanted_markers)
+    output_mibi_reporter.unwanted_compartments_table = list_2_md_table(unwanted_compartments)
+    output_mibi_reporter.unwanted_statistics_table = list_2_md_table(unwanted_statistics)
+
     expression_df = setup(output_folder, expression_mat_path)
 
-    cell_types = preprocess_celltypecolumn(
+    cell_types, found_cell_types = preprocess_celltypecolumn(
         expression_df, cell_types_to_remove, change_to
     )
 
+    output_mibi_reporter.found_cell_types_table = list_2_md_table(found_cell_types)
+    output_mibi_reporter.cell_types_table = list_2_md_table(cell_types)
+
     encoder, decoder = create_encoder_decoder(cell_types, output_folder, batch_name)
 
-    print(
-        f"""## Encoding:
-
-{tabulate.tabulate([[k] for k in encoder.keys()], showindex="always")}
-
-"""
-    )
+    output_mibi_reporter.encoding_table = tabulate.tabulate([[k] for k in encoder.keys()], showindex="always")
 
     save_encoded_labels(expression_df, encoder, output_folder, batch_name)
 
@@ -334,13 +449,7 @@ def preprocess_training_data(
         expression_df, additional_meta_data_to_keep, output_folder, batch_name
     )
 
-    print(
-        f"""## Count of each cell type:
-
-{expression_df.loc[:, "Class"].value_counts().to_markdown(tablefmt="simple")}
-        
-"""
-    )
+    output_mibi_reporter.cell_type_count_table = expression_df.loc[:, "Class"].value_counts().to_markdown(tablefmt="simple")
 
     expression_df = remove_prefixes_underscores(expression_df)
 
@@ -348,17 +457,8 @@ def preprocess_training_data(
 
     markers = collect_markers(expression_df)
 
-    print(
-        f"""## Markers found:
-
-{list_2_md_table(markers)}
-
-## User-defined markers to remove:
-
-{list_2_md_table(unwanted_markers)}
-
-"""
-    )
+    output_mibi_reporter.markers_table = list_2_md_table(markers)
+    output_mibi_reporter.unwanted_markers_table = list_2_md_table(unwanted_markers)
 
     expression_df = drop_markers(expression_df, markers, unwanted_markers)
 
@@ -370,30 +470,11 @@ def preprocess_training_data(
 
     expression_df = remove_statistics(expression_df, unwanted_statistics)
 
-    # print columns with NA values and instructions
-    print(
-        f"""## Columns with NA values:
-
-{list_2_md_table(expression_df.columns[expression_df.isna().any()].values, 2)}
-
-**If there are columns with NA values:**
-
-This will be an issue with the measurement names across different images, and cohorts. 
-If the problem is due to different measurement names across different images, this can be fixed by changing the names for the columns
-in the images where this is a problem. 
-
-Some things to check:
-
-* Do all of my images have the same channel names on QuPath?
-* Did I change the channel names before or after the segmentation? 
-    * If after, the measurements would have been created using the previous channel names.
-    * You can either change the names of the columns (best option) or if the channel names were
-    completely different and you don't know which corresponds to which, you should re run the segmentation
-    using the new channel names. 
-"""
-    )
+    output_mibi_reporter.null_columns_table = list_2_md_table(expression_df.columns[expression_df.isna().any()].values, 2)
 
     save_preprocessed_data(expression_df, output_folder, batch_name)
+
+    return output_mibi_reporter
 
 
 if __name__ == "__main__":
@@ -495,69 +576,7 @@ The data will be exported for XGBoost training or any supervised machine learnin
     except:
         unwanted_statistics = []
 
-    # print summary
-    print(
-        f"""
----
-title: MIBI data preprocessing summary report
-date: {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
-format:
-  html:
-    number-sections: true
-    embed-resources: true
-    theme: cosmo
----
-
-# Input Summary
-
-## Batch name:
-
-{batch_name}
-
-## Output folder:
-
-```
-{output_folder}
-```
-
-## QuPath data to be preprocessed:
-        
-```
-{expression_mat_path}
-```
-
-## Unwanted cell types:
-
-{list_2_md_table(cell_types_to_remove)}
-
-## Changing unwanted cell types to:
-
-{change_to}
-
-## Additional metadata to keep:
-
-{list_2_md_table(additional_meta_data_to_keep)}
-
-## Unwanted markers:
-
-{list_2_md_table(unwanted_markers)}
-
-## Unwanted compartments:
-
-{list_2_md_table(unwanted_compartments)}
-
-## Unwanted statistics:
-
-{list_2_md_table(unwanted_statistics)}
-
-# Results
-
----
-
-"""
-    )
-
-    preprocess_training_data(
+    output_mibi_reporter = preprocess_training_data(
         batch_name,
         output_folder,
         expression_mat_path,
@@ -566,5 +585,7 @@ format:
         additional_meta_data_to_keep,
         unwanted_markers,
         unwanted_compartments,
-        unwanted_statistics,
+        unwanted_statistics
     )
+
+    output_mibi_reporter.print_report()
