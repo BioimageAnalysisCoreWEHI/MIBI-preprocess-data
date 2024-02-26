@@ -41,6 +41,7 @@ format:
     number-sections: true
     embed-resources: true
     theme: cosmo
+    page-layout: full
 ---
 
 # Input Summary
