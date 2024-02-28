@@ -9,29 +9,34 @@ import os
 import json
 import datetime
 
+
+# class used to store report string and relevant data to be presented (as a string)
+# the member attributes are populated in the functions below
 class mibi_reporter:
-    
     def print_report(self):
-        print(self.report_template_str.format(
-            report_date = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            batch_name = self.batch_name,
-            output_folder = self.output_folder,
-            expression_mat_path = self.expression_mat_path,
-            cell_types_to_remove_table = self.cell_types_to_remove_table,
-            change_to = self.change_to,
-            additional_meta_data_to_keep_table = self.additional_meta_data_to_keep_table,
-            unwanted_markers_table = self.unwanted_markers_table,
-            unwanted_compartments_table = self.unwanted_compartments_table,
-            unwanted_statistics_table = self.unwanted_statistics_table,
-            found_cell_types_table = self.found_cell_types_table,
-            cell_types_table = self.cell_types_table,
-            encoding_table = self.encoding_table,
-            cell_type_count_table = self.cell_type_count_table,
-            markers_table = self.markers_table,
-            after_drop_markers_table = self.after_drop_markers_table,
-            null_columns_table = self.null_columns_table,
-            warnings = self.warnings
-        ))
+        print(
+            self.report_template_str.format(
+                report_date=datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                batch_name=self.batch_name,
+                output_folder=self.output_folder,
+                expression_mat_path=self.expression_mat_path,
+                cell_types_to_remove_table=self.cell_types_to_remove_table,
+                change_to=self.change_to,
+                additional_meta_data_to_keep_table=self.additional_meta_data_to_keep_table,
+                unwanted_markers_table=self.unwanted_markers_table,
+                unwanted_compartments_table=self.unwanted_compartments_table,
+                unwanted_statistics_table=self.unwanted_statistics_table,
+                found_cell_types_table=self.found_cell_types_table,
+                cell_types_table=self.cell_types_table,
+                encoding_table=self.encoding_table,
+                cell_type_count_table=self.cell_type_count_table,
+                markers_table=self.markers_table,
+                after_drop_markers_table=self.after_drop_markers_table,
+                null_columns_table=self.null_columns_table,
+                warnings=self.warnings,
+            )
+        )
+
     def __init__(self):
         self.report_template_str = """
 ---
@@ -141,6 +146,7 @@ Some things to check:
 {warnings}
 """
 
+
 def list_2_md_table(input_list, columns=3) -> str:
     """
     Convert a 1D list to a markdown table with specified no. of columns.
@@ -157,21 +163,25 @@ def list_2_md_table(input_list, columns=3) -> str:
 
 
 def setup(output_folder, expression_mat_path):
+    """
+    Create output folder and read in the input CSV file
+    """
     os.makedirs(output_folder, exist_ok=True)
     expression_df = pd.read_csv(expression_mat_path)
     return expression_df
+
 
 def generate_warnings(expression_df) -> str:
     """
     Checks input dataframe for known issues:
         * Duplicate column names after removing underscores
     """
-    warning_str = ''
+    warning_str = ""
 
     # duplicate column names
     column_names_orig = expression_df.columns
     column_names = column_names_orig.str.replace("Target:", "")
-    column_names = column_names.str.replace('_', ' ')
+    column_names = column_names.str.replace("_", " ")
     duplicated_column_names = column_names[column_names.duplicated()]
 
     if len(duplicated_column_names) > 0:
@@ -190,11 +200,14 @@ Post-transformation duplicate columns found:
 
         # label the dataframe and save table
         duplicated_columns_df.index.name = "Duplicate Column Name"
-        colnames = [f"Original Column Name {int(i)+1}" for i in duplicated_columns_df.columns]
+        colnames = [
+            f"Original Column Name {int(i)+1}" for i in duplicated_columns_df.columns
+        ]
         duplicated_columns_df.columns = colnames
         warning_str += duplicated_columns_df.to_markdown(tablefmt="simple")
 
     return warning_str
+
 
 def preprocess_celltypecolumn(
     expression_df, cell_types_to_remove=["Unknown"], change_to="Other"
@@ -236,6 +249,9 @@ def preprocess_celltypecolumn(
 
 
 def create_encoder_decoder(cell_types, output_folder, batch_name):
+    """
+    Creates a dictionary that maps between integer labels and string labels for the cell types
+    """
     # encoder for converting your labels
     encoder = {cell_types[i]: i for i in range(len(cell_types))}
 
@@ -315,6 +331,7 @@ def remove_prefixes_underscores(expression_df):
     expression_df.columns = expression_df.columns.str.replace("_", " ")
 
     return expression_df
+
 
 def remove_duplicate_columns(expression_df):
     """
@@ -457,25 +474,32 @@ def preprocess_training_data(
     additional_meta_data_to_keep,
     unwanted_markers,
     unwanted_compartments,
-    unwanted_statistics
+    unwanted_statistics,
 ) -> mibi_reporter:
-    
     output_mibi_reporter = mibi_reporter()
     output_mibi_reporter.batch_name = batch_name
     output_mibi_reporter.output_folder = output_folder
     output_mibi_reporter.expression_mat_path = expression_mat_path
-    output_mibi_reporter.cell_types_to_remove_table = list_2_md_table(cell_types_to_remove)
+    output_mibi_reporter.cell_types_to_remove_table = list_2_md_table(
+        cell_types_to_remove
+    )
     output_mibi_reporter.change_to = change_to
-    output_mibi_reporter.additional_meta_data_to_keep_table = list_2_md_table(additional_meta_data_to_keep)
+    output_mibi_reporter.additional_meta_data_to_keep_table = list_2_md_table(
+        additional_meta_data_to_keep
+    )
     output_mibi_reporter.unwanted_markers_table = list_2_md_table(unwanted_markers)
-    output_mibi_reporter.unwanted_compartments_table = list_2_md_table(unwanted_compartments)
-    output_mibi_reporter.unwanted_statistics_table = list_2_md_table(unwanted_statistics)
+    output_mibi_reporter.unwanted_compartments_table = list_2_md_table(
+        unwanted_compartments
+    )
+    output_mibi_reporter.unwanted_statistics_table = list_2_md_table(
+        unwanted_statistics
+    )
 
     expression_df = setup(output_folder, expression_mat_path)
 
     output_mibi_reporter.warnings = generate_warnings(expression_df)
 
-    found_cell_types, cell_types  = preprocess_celltypecolumn(
+    found_cell_types, cell_types = preprocess_celltypecolumn(
         expression_df, cell_types_to_remove, change_to
     )
 
@@ -484,7 +508,9 @@ def preprocess_training_data(
 
     encoder, decoder = create_encoder_decoder(cell_types, output_folder, batch_name)
 
-    output_mibi_reporter.encoding_table = tabulate.tabulate([[k] for k in encoder.keys()], showindex="always")
+    output_mibi_reporter.encoding_table = tabulate.tabulate(
+        [[k] for k in encoder.keys()], showindex="always"
+    )
 
     save_encoded_labels(expression_df, encoder, output_folder, batch_name)
 
@@ -494,7 +520,9 @@ def preprocess_training_data(
         expression_df, additional_meta_data_to_keep, output_folder, batch_name
     )
 
-    output_mibi_reporter.cell_type_count_table = expression_df.loc[:, "Class"].value_counts().to_markdown(tablefmt="simple")
+    output_mibi_reporter.cell_type_count_table = (
+        expression_df.loc[:, "Class"].value_counts().to_markdown(tablefmt="simple")
+    )
 
     expression_df = remove_prefixes_underscores(expression_df)
 
@@ -518,7 +546,9 @@ def preprocess_training_data(
 
     expression_df = remove_statistics(expression_df, unwanted_statistics)
 
-    output_mibi_reporter.null_columns_table = list_2_md_table(expression_df.columns[expression_df.isna().any()].values, 2)
+    output_mibi_reporter.null_columns_table = list_2_md_table(
+        expression_df.columns[expression_df.isna().any()].values, 2
+    )
 
     save_preprocessed_data(expression_df, output_folder, batch_name)
 
@@ -602,7 +632,9 @@ The data will be exported for XGBoost training or any supervised machine learnin
 
     # might be None
     try:
-        additional_meta_data_to_keep = [s.strip() for s in args.additional_metadata_to_keep.split(",")]
+        additional_meta_data_to_keep = [
+            s.strip() for s in args.additional_metadata_to_keep.split(",")
+        ]
     except:
         additional_meta_data_to_keep = []
 
@@ -614,7 +646,9 @@ The data will be exported for XGBoost training or any supervised machine learnin
 
     # might be None
     try:
-        unwanted_compartments = [s.strip() for s in args.unwanted_compartments.split(",")]
+        unwanted_compartments = [
+            s.strip() for s in args.unwanted_compartments.split(",")
+        ]
     except:
         unwanted_compartments = []
 
@@ -633,7 +667,7 @@ The data will be exported for XGBoost training or any supervised machine learnin
         additional_meta_data_to_keep,
         unwanted_markers,
         unwanted_compartments,
-        unwanted_statistics
+        unwanted_statistics,
     )
 
     output_mibi_reporter.print_report()
