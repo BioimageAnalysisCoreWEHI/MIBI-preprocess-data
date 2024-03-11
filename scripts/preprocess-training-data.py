@@ -171,6 +171,34 @@ def setup(output_folder, expression_mat_path):
     return expression_df
 
 
+def remove_dots(expression_df) -> pd.DataFrame:
+    """
+    Tries to translate newer QuPath data to older, more sensible format.
+    """
+
+    cols = expression_df.columns.copy()
+    # let's start easy...
+    cols = cols.str.replace("Âµm", "µm")
+    cols = cols.str.replace("µm.2", "µm^2", regex=False)
+    cols = cols.str.replace("Centroid.X.", "Centroid X ", regex=False)
+    cols = cols.str.replace("Centroid.Y.", "Centroid Y ", regex=False)
+
+    # these are "known" specific replacements
+    cols = cols.str.replace("MHC.I..", "MHC I (", regex=False)
+    cols = cols.str.replace("MHC.II..", "MHC II (", regex=False)
+    cols = cols.str.replace("MHC_I_.", "MHC_I_(", regex=False)
+    cols = cols.str.replace("MHC_II_.", "MHC_II_(", regex=False)
+
+    # once all the known specific replacements are performed, we can be a little more presumptuous...
+    cols = cols.str.replace("...", "): ", regex=False)
+    cols = cols.str.replace("..", ": ", regex=False)
+    # replaces periods with spaces when the period isn't between two numbers
+    cols = cols.str.replace("(?<!\d)\.(?!\d)", " ", regex=True)
+
+    expression_df.columns = cols
+
+    return expression_df
+
 def generate_warnings(expression_df) -> str:
     """
     Checks input dataframe for known issues:
@@ -511,6 +539,8 @@ def preprocess_training_data(
     )
 
     expression_df = setup(output_folder, expression_mat_path)
+
+    expression_df = remove_dots(expression_df)
 
     output_mibi_reporter.warnings = generate_warnings(expression_df)
 
