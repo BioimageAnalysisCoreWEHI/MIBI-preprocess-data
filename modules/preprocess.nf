@@ -73,9 +73,10 @@ process PREPROCESS {
 	echo "!{params.output_folder}/!{batch_name}_preprocessed_input_data.csv" >> "$REPORT_QMD"
 	echo "\\`\\`\\`" >> "$REPORT_QMD"
 	echo "" >> "$REPORT_QMD"
-	if [ "!{params.target}" == "functional-marker" ]
+	if [[ "!{params.target}" == "fm"* ]]
 	then
 		echo "**Binarized Classification Labels:**" >> "$REPORT_QMD"
+		echo "" >> "$REPORT_QMD"
 		echo "\\`\\`\\`" >> "$REPORT_QMD"
 		echo "!{params.output_folder}/!{batch_name}_binarized_labels.csv" >> "$REPORT_QMD"
 		echo "\\`\\`\\`" >> "$REPORT_QMD"
