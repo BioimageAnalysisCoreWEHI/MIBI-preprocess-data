@@ -248,7 +248,11 @@ def drop_markers(expression_df, markers, excluded_markers, cell_types):
     ]
 
     # return dataframe with measurement columns, but retain also retain one-hot-enconded cell types
-    return expression_df.loc[:, measurement_columns + cell_types]
+    # if cell-types aren't one-hot-encoded, then return just the measurements
+    try:
+        return expression_df.loc[:, measurement_columns + cell_types]
+    except KeyError:
+        return expression_df.loc[:, measurement_columns]
 
 
 def preprocess_training_data(
@@ -261,6 +265,7 @@ def preprocess_training_data(
     unwanted_markers,
     unwanted_compartments,
     unwanted_statistics,
+    with_celltype = True
 ) -> mibi_reporter:
     output_mibi_reporter = mibi_reporter()
     output_mibi_reporter.batch_name = batch_name
@@ -312,7 +317,10 @@ def preprocess_training_data(
         expression_df["Class"].value_counts().to_markdown(tablefmt="simple")
     )
 
-    expression_df = one_hot_encode_cell_types(expression_df, cell_types)
+    if with_celltype: 
+        expression_df = one_hot_encode_cell_types(expression_df, cell_types)
+    else:
+        expression_df.drop("Class", axis=1, inplace=True)
 
     expression_df = remove_prefixes_underscores(expression_df)
 

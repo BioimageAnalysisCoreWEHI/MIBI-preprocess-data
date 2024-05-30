@@ -61,7 +61,7 @@ The data will be exported for XGBoost training or any supervised machine learnin
     parser.add_argument(
         "target",
         help='Whether to preprocess the data for the "cell type" classification pipeline, or the "functional marker" classification pipeline',
-        choices=["cell-type", "functional-marker"],
+        choices=["cell-type", "fm-measurements-only", "fm-with-celltype"],
     )
 
     args = parser.parse_args()
@@ -108,19 +108,34 @@ The data will be exported for XGBoost training or any supervised machine learnin
 
     if args.target == "cell-type":
         from preprocess_cell_type_classification import preprocess_training_data
-    elif args.target == "functional-marker":
+        output_mibi_reporter = preprocess_training_data(
+            batch_name,
+            output_folder,
+            expression_mat_path,
+            cell_types_to_remove,
+            change_to,
+            additional_meta_data_to_keep,
+            unwanted_markers,
+            unwanted_compartments,
+            unwanted_statistics
+        )
+    else: # fm
         from preprocess_functional_marker_classification import preprocess_training_data
-
-    output_mibi_reporter = preprocess_training_data(
-        batch_name,
-        output_folder,
-        expression_mat_path,
-        cell_types_to_remove,
-        change_to,
-        additional_meta_data_to_keep,
-        unwanted_markers,
-        unwanted_compartments,
-        unwanted_statistics,
-    )
+        if args.target == "fm-measurements-only":
+            with_celltype = False
+        else: # fm-with-celltype
+            with_celltype = True
+        output_mibi_reporter = preprocess_training_data(
+            batch_name,
+            output_folder,
+            expression_mat_path,
+            cell_types_to_remove,
+            change_to,
+            additional_meta_data_to_keep,
+            unwanted_markers,
+            unwanted_compartments,
+            unwanted_statistics,
+            with_celltype,
+        )
 
     output_mibi_reporter.print_report()
