@@ -18,13 +18,13 @@ def test_preprocessing_outputs_match_base():
         "annotationsTest_base_decoder.json": "c53755ba55d4dba46c2c173febc9229f9d90c26f6a8350e8e94355373c4257b9"
     }
 
-    subprocess.run(["python", "../scripts/preprocess-training-data.py",
-        "-n", "annotationsTest_base",
-        "-o", _output_file_path,
-        "-d", _input_file_path,
-        "-l", "Unknown",
-        "-t", "Other",
-        "-m", "dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum"])
+    subprocess.run(["quarto", "render", "../assets/report-template.qmd",
+        "-P", "batch_name:annotationsTest_base",
+        "-P", f"output_folder:{_output_file_path}",
+        "-P", f"qupath_data:{_input_file_path}",
+        "-P", "unwanted_celltypes:Unknown",
+        "-P", "change_unwanted_celltypes_to:Other",
+        "-P", "unwanted_markers:dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum"])
 
     assert compare_hashes(_output_file_path, hashes)
 
@@ -128,18 +128,18 @@ def test_preprocessing_outputs_match_base_spaces():
     """
 
     hashes = {
-        "annotationsTest_base2_cell_type_labels.csv" : "b0b859c60bdd9de3fb3d9417ac4e5aeaa4d83cf0ec621b64b1e77aa6665808d7",
-        "annotationsTest_base2_images.csv" : "51fc38a630ddca6becde6557f7b1086680e164878a42d2f84504deb8ef2f48d9",
-        "annotationsTest_base2_preprocessed_input_data.csv" : "f8326dc227f17d6bc35b84205704ce8bb315581546391968c4da3afcd88a23f5",
-        "annotationsTest_base2_decoder.json": "c53755ba55d4dba46c2c173febc9229f9d90c26f6a8350e8e94355373c4257b9"
+        "annotationsTest_base_spaces_cell_type_labels.csv" : "b0b859c60bdd9de3fb3d9417ac4e5aeaa4d83cf0ec621b64b1e77aa6665808d7",
+        "annotationsTest_base_spaces_images.csv" : "51fc38a630ddca6becde6557f7b1086680e164878a42d2f84504deb8ef2f48d9",
+        "annotationsTest_base_spaces_preprocessed_input_data.csv" : "f8326dc227f17d6bc35b84205704ce8bb315581546391968c4da3afcd88a23f5",
+        "annotationsTest_base_spaces_decoder.json": "c53755ba55d4dba46c2c173febc9229f9d90c26f6a8350e8e94355373c4257b9"
     }
 
-    subprocess.run(["python", "../scripts/preprocess-training-data.py",
-        "-n", "annotationsTest_base2",
-        "-o", _output_file_path,
-        "-d", _input_file_path,
-        "-l", "Unknown",
-        "-t", "Other",
-        "-m", "dsDNA, Beta-Tubulin, CD39, CD49a, Tantalum"])
+    subprocess.run(["quarto", "render", "../assets/report-template.qmd",
+        "-P", "batch_name:annotationsTest_base_spaces",
+        "-P", f"output_folder:{_output_file_path}",
+        "-P", f"qupath_data:{_input_file_path}",
+        "-P", "unwanted_celltypes:Unknown",
+        "-P", "change_unwanted_celltypes_to:Other",
+        "-P", "unwanted_markers:dsDNA, Beta-Tubulin, CD39, CD49a, Tantalum"])
 
     assert compare_hashes(_output_file_path, hashes)
