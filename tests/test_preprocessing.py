@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 import os, pytest, subprocess
 
-from utils import compare_hashes
+from utils import compare_hashes, clean_files
 
 _output_file_path = "../output"
 _input_file_path = "../annotationsTest.csv"
@@ -18,6 +18,8 @@ def test_preprocessing_outputs_match_base():
         "annotationsTest_base_preprocessed_input_data.csv" : "f8326dc227f17d6bc35b84205704ce8bb315581546391968c4da3afcd88a23f5",
         "annotationsTest_base_decoder.json": "c53755ba55d4dba46c2c173febc9229f9d90c26f6a8350e8e94355373c4257b9"
     }
+
+    clean_files([os.path.join(_output_file_path, k) for k in hashes.keys()])
 
     subprocess.run(["quarto", "render", "../assets/report-template.qmd",
         "-P", "batch_name:annotationsTest_base",
@@ -43,6 +45,8 @@ def test_preprocessing_outputs_match_allmarkers():
         "annotationsTest_allMarkers_decoder.json": "c53755ba55d4dba46c2c173febc9229f9d90c26f6a8350e8e94355373c4257b9",
     }
 
+    clean_files([os.path.join(_output_file_path, k) for k in hashes.keys()])
+
     subprocess.run(["quarto", "render", "../assets/report-template.qmd",
         "-P", "batch_name:annotationsTest_allMarkers",
         "-P", f"output_folder:{_output_file_path}",
@@ -65,6 +69,8 @@ def test_preprocessing_outputs_match_nobcells():
         "annotationsTest_noBCells_preprocessed_input_data.csv" : "f8326dc227f17d6bc35b84205704ce8bb315581546391968c4da3afcd88a23f5",
         "annotationsTest_noBCells_decoder.json": "4818c1cde68d57d023a5bb1bfe39c1a6a783b9cbbcdc92354f7ffd6b5cfb56d5",
     }
+
+    clean_files([os.path.join(_output_file_path, k) for k in hashes.keys()])
 
     subprocess.run(["quarto", "render", "../assets/report-template.qmd",
         "-P", "batch_name:annotationsTest_noBCells",
@@ -89,6 +95,8 @@ def test_preprocessing_outputs_match_nonucleus999percentile():
         "annotationsTest_noNucleus99.9Percentile_preprocessed_input_data.csv" : "65f727363319a6dc4e7688f84e9b7180c8854210dd68b14203b5f3dfe0387530",
         "annotationsTest_noNucleus99.9Percentile_decoder.json": "c53755ba55d4dba46c2c173febc9229f9d90c26f6a8350e8e94355373c4257b9",
     }
+
+    clean_files([os.path.join(_output_file_path, k) for k in hashes.keys()])
 
     subprocess.run(["quarto", "render", "../assets/report-template.qmd",
         "-P", "batch_name:annotationsTest_noNucleus99.9Percentile",
@@ -116,6 +124,8 @@ def test_preprocessing_outputs_match_withnucleuslengthmetadata():
         "annotationsTest_withNucleusLengthMetadata_decoder.json": "c53755ba55d4dba46c2c173febc9229f9d90c26f6a8350e8e94355373c4257b9"
     }
 
+    clean_files([os.path.join(_output_file_path, k) for k in hashes.keys()])
+
     subprocess.run(["quarto", "render", "../assets/report-template.qmd",
         "-P", "batch_name:annotationsTest_withNucleusLengthMetadata",
         "-P", f"output_folder:{_output_file_path}",
@@ -140,6 +150,8 @@ def test_preprocessing_outputs_match_base_spaces():
         "annotationsTest_base_spaces_decoder.json": "c53755ba55d4dba46c2c173febc9229f9d90c26f6a8350e8e94355373c4257b9"
     }
 
+    clean_files([os.path.join(_output_file_path, k) for k in hashes.keys()])
+
     subprocess.run(["quarto", "render", "../assets/report-template.qmd",
         "-P", "batch_name:annotationsTest_base_spaces",
         "-P", f"output_folder:{_output_file_path}",
@@ -163,6 +175,8 @@ def test_preprocessing_outputs_match_base_fm_withcelltype():
         "fm_with_celltype_base_decoder.json": "075ecdf0b3024954218891a3c444d92a7024496a6c42b14a3d72af6fc5824353"
     }
 
+    clean_files([os.path.join(_output_file_path, k) for k in hashes.keys()])
+
     subprocess.run(["quarto", "render", "../assets/report-template.qmd",
         "--execute-dir", ".",
         "-P", "batch_name:fm_with_celltype_base",
@@ -185,6 +199,8 @@ def test_preprocessing_outputs_match_base_fm_markersonly():
         "fm_markers_only_base_decoder.json": "075ecdf0b3024954218891a3c444d92a7024496a6c42b14a3d72af6fc5824353"
     }
 
+    clean_files([os.path.join(_output_file_path, k) for k in hashes.keys()])
+    
     subprocess.run(["quarto", "render", "../assets/report-template.qmd",
         "--execute-dir", ".",
         "-P", "batch_name:fm_markers_only_base",
