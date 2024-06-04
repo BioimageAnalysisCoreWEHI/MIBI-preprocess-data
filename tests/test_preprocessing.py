@@ -5,6 +5,7 @@ from utils import compare_hashes
 
 _output_file_path = "../output"
 _input_file_path = "../annotationsTest.csv"
+_fm_input_file_path = "fm-test-data.csv"
 
 def test_preprocessing_outputs_match_base():
     """
@@ -24,7 +25,8 @@ def test_preprocessing_outputs_match_base():
         "-P", f"qupath_data:{_input_file_path}",
         "-P", "unwanted_celltypes:Unknown",
         "-P", "change_unwanted_celltypes_to:Other",
-        "-P", "unwanted_markers:dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum"])
+        "-P", "unwanted_markers:dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum"
+    ])
 
     assert compare_hashes(_output_file_path, hashes)
 
@@ -46,7 +48,8 @@ def test_preprocessing_outputs_match_allmarkers():
         "-P", f"output_folder:{_output_file_path}",
         "-P", f"qupath_data:{_input_file_path}",
         "-P", "unwanted_celltypes:Unknown",
-        "-P", "change_unwanted_celltypes_to:Other"])
+        "-P", "change_unwanted_celltypes_to:Other"
+    ])
 
     assert compare_hashes(_output_file_path, hashes)
 
@@ -69,7 +72,8 @@ def test_preprocessing_outputs_match_nobcells():
         "-P", f"qupath_data:{_input_file_path}",
         "-P", "unwanted_celltypes:Unknown,B cells",
         "-P", "change_unwanted_celltypes_to:Other",
-        "-P", "unwanted_markers:dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum"])
+        "-P", "unwanted_markers:dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum"
+    ])
 
     assert compare_hashes(_output_file_path, hashes)
 
@@ -93,7 +97,8 @@ def test_preprocessing_outputs_match_nonucleus999percentile():
         "-P", "unwanted_celltypes:Unknown",
         "-P", "change_unwanted_celltypes_to:Other",
         "-P", "unwanted_markers:dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum",
-        "-P", "unwanted_statistics:\" Nucleus: Mean, Nucleus: Median, Nucleus: Min, Nucleus: Max, Nucleus: Std.Dev, Nucleus: Percentile: 91.0, Nucleus: Percentile: 92.0, Nucleus: Percentile: 93.0, Nucleus: Percentile: 94.0, Nucleus: Percentile: 96.0,Nucleus: Percentile: 97.0, Nucleus: Percentile: 98.0, Nucleus: Percentile: 99.0, Nucleus: Percentile: 99.5, Nucleus: Percentile: 95.0, Nucleus: Percentile: 90.0, Nucleus: Percentile: 80.0, Nucleus: Percentile: 70.0\""])
+        "-P", "unwanted_statistics:\" Nucleus: Mean, Nucleus: Median, Nucleus: Min, Nucleus: Max, Nucleus: Std.Dev, Nucleus: Percentile: 91.0, Nucleus: Percentile: 92.0, Nucleus: Percentile: 93.0, Nucleus: Percentile: 94.0, Nucleus: Percentile: 96.0,Nucleus: Percentile: 97.0, Nucleus: Percentile: 98.0, Nucleus: Percentile: 99.0, Nucleus: Percentile: 99.5, Nucleus: Percentile: 95.0, Nucleus: Percentile: 90.0, Nucleus: Percentile: 80.0, Nucleus: Percentile: 70.0\""
+    ])
 
     assert compare_hashes(_output_file_path, hashes)
 
@@ -118,7 +123,8 @@ def test_preprocessing_outputs_match_withnucleuslengthmetadata():
         "-P", "unwanted_celltypes:Unknown",
         "-P", "change_unwanted_celltypes_to:Other",
         "-P", "unwanted_markers:dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum",
-        "-P", "additional_metadata_to_keep:\"Nucleus: Length µm\""])
+        "-P", "additional_metadata_to_keep:\"Nucleus: Length µm\""
+    ])
 
     assert compare_hashes(_output_file_path, hashes)
 
@@ -140,6 +146,51 @@ def test_preprocessing_outputs_match_base_spaces():
         "-P", f"qupath_data:{_input_file_path}",
         "-P", "unwanted_celltypes:Unknown",
         "-P", "change_unwanted_celltypes_to:Other",
-        "-P", "unwanted_markers:dsDNA, Beta-Tubulin, CD39, CD49a, Tantalum"])
+        "-P", "unwanted_markers:dsDNA, Beta-Tubulin, CD39, CD49a, Tantalum"
+    ])
+
+    assert compare_hashes(_output_file_path, hashes)
+
+def test_preprocessing_outputs_match_base_fm_withcelltype():
+    """
+    Tests the fm-with-celltype target with minimal args.
+    """
+
+    hashes = {
+        "fm_with_celltype_base_binarized_labels.csv": "813af5273ba0390680ca9d36af382e4f386b4064e0aa3162a72b8fddefd03f3d",
+        "fm_with_celltype_base_preprocessed_input_data.csv": "1ac48beec55fb07035e84318f4dd1cef144bc217592a7233d8425b1485005561",
+        "fm_with_celltype_base_images.csv": "f82d90e476d3ad104d24998470270841b4366aa76a3447e8cf81918723338c98",
+        "fm_with_celltype_base_decoder.json": "075ecdf0b3024954218891a3c444d92a7024496a6c42b14a3d72af6fc5824353"
+    }
+
+    subprocess.run(["quarto", "render", "../assets/report-template.qmd",
+        "--execute-dir", ".",
+        "-P", "batch_name:fm_with_celltype_base",
+        "-P", f"output_folder:{_output_file_path}",
+        "-P", f"qupath_data:{_fm_input_file_path}",
+        "-P", "target:fm-with-celltype"
+    ])
+
+    assert compare_hashes(_output_file_path, hashes)
+
+def test_preprocessing_outputs_match_base_fm_markersonly():
+    """
+    Tests the fm-markers-only target with minimal args.
+    """
+
+    hashes = {
+        "fm_markers_only_base_binarized_labels.csv": "813af5273ba0390680ca9d36af382e4f386b4064e0aa3162a72b8fddefd03f3d",
+        "fm_markers_only_base_preprocessed_input_data.csv": "83357cadfb45d9e3e532f4c08c5dcfb2c54ba0aa215e31fd081355add09cca3d",
+        "fm_markers_only_base_images.csv": "f82d90e476d3ad104d24998470270841b4366aa76a3447e8cf81918723338c98",
+        "fm_markers_only_base_decoder.json": "075ecdf0b3024954218891a3c444d92a7024496a6c42b14a3d72af6fc5824353"
+    }
+
+    subprocess.run(["quarto", "render", "../assets/report-template.qmd",
+        "--execute-dir", ".",
+        "-P", "batch_name:fm_markers_only_base",
+        "-P", f"output_folder:{_output_file_path}",
+        "-P", f"qupath_data:{_fm_input_file_path}",
+        "-P", "target:fm-markers-only"
+    ])
 
     assert compare_hashes(_output_file_path, hashes)

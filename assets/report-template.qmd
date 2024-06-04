@@ -28,7 +28,7 @@ unwanted_celltypes = ""
 change_unwanted_celltypes_to = "Other"
 unwanted_markers = ""
 unwanted_compartments = ""
-unwanted_statistics = ""
+unwanted_statistics = " Nucleus: Mean, Nucleus: Median, Nucleus: Min, Nucleus: Max, Nucleus: Std.Dev, Nucleus: Percentile: 91.0, Nucleus: Percentile: 92.0, Nucleus: Percentile: 93.0, Nucleus: Percentile: 94.0, Nucleus: Percentile: 96.0,Nucleus: Percentile: 97.0, Nucleus: Percentile: 98.0, Nucleus: Percentile: 99.0, Nucleus: Percentile: 99.5, Nucleus: Percentile: 99.9, Nucleus: Percentile: 95.0, Nucleus: Percentile: 90.0, Nucleus: Percentile: 80.0, Nucleus: Percentile: 70.0"
 target = "main-cell-type"
 ```
 
@@ -43,7 +43,7 @@ validate_arg(batch_name, "batch_name")
 validate_arg(output_folder, "output_folder")
 validate_arg(qupath_data, "qupath_data")
 
-valid_target = ["main-cell-type", "fm-markers-only", "fm-with-celltypes"]
+valid_target = ["main-cell-type", "fm-markers-only", "fm-with-celltype"]
 if (not target) or target not in valid_target:
     raise RuntimeError(f"target must either one of {valid_target}")
 
@@ -385,9 +385,33 @@ print(expression_df.loc[:, "Class"].value_counts().to_markdown(tablefmt="simple"
 ```{python}
 #| label: one-hot-encode-celltypes
 
-if target == "fm-with-celltype": 
-        expression_df = one_hot_encode_cell_types(expression_df, cell_types)
-elif target == "fm-markers-only":
+if target == "fm-with-celltype":
+    import sklearn.preprocessing
+    """
+    Convert column of cell types to one-hot-encoded array
+
+    For example, column of [Epithelial Cells, Dendritic Cells, Other] becomes:
+
+    | Dendritic Cells, Epithelial Cells, Other |
+    |               0,                 1,    0 |
+    |               1,                 0,    0 |
+    |               0,                 0,    1 |
+    """
+
+    lb = sklearn.preprocessing.LabelBinarizer()
+    cell_types_s = expression_df["Class"]
+    expression_df = pd.concat(
+        (
+            expression_df,
+            pd.DataFrame(
+                lb.fit_transform(cell_types_s),
+                columns=cell_types,
+                index=expression_df.index,
+            ),
+        ),
+        axis=1,
+    )
+if "fm" in target:
     expression_df.drop("Class", axis=1, inplace=True)
 ```
 
@@ -444,7 +468,11 @@ markers_ = [s + ": " for s in markers if s not in unwanted_markers]
 measurement_columns = [
     col for col in expression_df.columns if any(map(col.__contains__, markers_))
 ]
-expression_df = expression_df.loc[:, measurement_columns]
+
+if target == "fm-with-celltype":
+    expression_df = expression_df.loc[:, measurement_columns + cell_types]
+else:
+    expression_df = expression_df.loc[:, measurement_columns]
 
 # markers to include
 markers = [
