@@ -41,12 +41,12 @@ def test_preprocessing_outputs_match_allmarkers():
         "annotationsTest_allMarkers_decoder.json": "c53755ba55d4dba46c2c173febc9229f9d90c26f6a8350e8e94355373c4257b9",
     }
 
-    subprocess.run(["python", "../scripts/preprocess-training-data.py",
-        "-n", "annotationsTest_allMarkers",
-        "-o", _output_file_path,
-        "-d", _input_file_path,
-        "-l", "Unknown",
-        "-t", "Other"])
+    subprocess.run(["quarto", "render", "../assets/report-template.qmd",
+        "-P", "batch_name:annotationsTest_allMarkers",
+        "-P", f"output_folder:{_output_file_path}",
+        "-P", f"qupath_data:{_input_file_path}",
+        "-P", "unwanted_celltypes:Unknown",
+        "-P", "change_unwanted_celltypes_to:Other"])
 
     assert compare_hashes(_output_file_path, hashes)
 
@@ -63,13 +63,13 @@ def test_preprocessing_outputs_match_nobcells():
         "annotationsTest_noBCells_decoder.json": "4818c1cde68d57d023a5bb1bfe39c1a6a783b9cbbcdc92354f7ffd6b5cfb56d5",
     }
 
-    subprocess.run(["python", "../scripts/preprocess-training-data.py",
-        "-n", "annotationsTest_noBCells",
-        "-o", _output_file_path,
-        "-d", _input_file_path,
-        "-l", "Unknown,B cells",
-        "-t", "Other",
-        "-m", "dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum"])
+    subprocess.run(["quarto", "render", "../assets/report-template.qmd",
+        "-P", "batch_name:annotationsTest_noBCells",
+        "-P", f"output_folder:{_output_file_path}",
+        "-P", f"qupath_data:{_input_file_path}",
+        "-P", "unwanted_celltypes:Unknown,B cells",
+        "-P", "change_unwanted_celltypes_to:Other",
+        "-P", "unwanted_markers:dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum"])
 
     assert compare_hashes(_output_file_path, hashes)
 
@@ -86,14 +86,14 @@ def test_preprocessing_outputs_match_nonucleus999percentile():
         "annotationsTest_noNucleus99.9Percentile_decoder.json": "c53755ba55d4dba46c2c173febc9229f9d90c26f6a8350e8e94355373c4257b9",
     }
 
-    subprocess.run(["python", "../scripts/preprocess-training-data.py",
-        "-n", "annotationsTest_noNucleus99.9Percentile",
-        "-o", _output_file_path,
-        "-d", _input_file_path,
-        "-l", "Unknown",
-        "-t", "Other",
-        "-m", "dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum",
-        "-s", " Nucleus: Mean, Nucleus: Median, Nucleus: Min, Nucleus: Max, Nucleus: Std.Dev, Nucleus: Percentile: 91.0, Nucleus: Percentile: 92.0, Nucleus: Percentile: 93.0, Nucleus: Percentile: 94.0, Nucleus: Percentile: 96.0,Nucleus: Percentile: 97.0, Nucleus: Percentile: 98.0, Nucleus: Percentile: 99.0, Nucleus: Percentile: 99.5, Nucleus: Percentile: 95.0, Nucleus: Percentile: 90.0, Nucleus: Percentile: 80.0, Nucleus: Percentile: 70.0"])
+    subprocess.run(["quarto", "render", "../assets/report-template.qmd",
+        "-P", "batch_name:annotationsTest_noNucleus99.9Percentile",
+        "-P", f"output_folder:{_output_file_path}",
+        "-P", f"qupath_data:{_input_file_path}",
+        "-P", "unwanted_celltypes:Unknown",
+        "-P", "change_unwanted_celltypes_to:Other",
+        "-P", "unwanted_markers:dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum",
+        "-P", "unwanted_statistics:\" Nucleus: Mean, Nucleus: Median, Nucleus: Min, Nucleus: Max, Nucleus: Std.Dev, Nucleus: Percentile: 91.0, Nucleus: Percentile: 92.0, Nucleus: Percentile: 93.0, Nucleus: Percentile: 94.0, Nucleus: Percentile: 96.0,Nucleus: Percentile: 97.0, Nucleus: Percentile: 98.0, Nucleus: Percentile: 99.0, Nucleus: Percentile: 99.5, Nucleus: Percentile: 95.0, Nucleus: Percentile: 90.0, Nucleus: Percentile: 80.0, Nucleus: Percentile: 70.0\""])
 
     assert compare_hashes(_output_file_path, hashes)
 
@@ -111,14 +111,14 @@ def test_preprocessing_outputs_match_withnucleuslengthmetadata():
         "annotationsTest_withNucleusLengthMetadata_decoder.json": "c53755ba55d4dba46c2c173febc9229f9d90c26f6a8350e8e94355373c4257b9"
     }
 
-    subprocess.run(["python", "../scripts/preprocess-training-data.py",
-        "-n", "annotationsTest_withNucleusLengthMetadata",
-        "-o", _output_file_path,
-        "-d", _input_file_path,
-        "-l", "Unknown",
-        "-t", "Other",
-        "-m", "dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum",
-        "-a", "Nucleus: Length µm"])
+    subprocess.run(["quarto", "render", "../assets/report-template.qmd",
+        "-P", "batch_name:annotationsTest_withNucleusLengthMetadata",
+        "-P", f"output_folder:{_output_file_path}",
+        "-P", f"qupath_data:{_input_file_path}",
+        "-P", "unwanted_celltypes:Unknown",
+        "-P", "change_unwanted_celltypes_to:Other",
+        "-P", "unwanted_markers:dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum",
+        "-P", "additional_metadata_to_keep:\"Nucleus: Length µm\""])
 
     assert compare_hashes(_output_file_path, hashes)
 
