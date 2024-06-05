@@ -101,7 +101,8 @@ workflow {
                   params.change_to,
                   params.unwanted_markers,
                   params.unwanted_compartments,
-                  params.unwanted_statistics
+                  params.unwanted_statistics,
+                  Channel.fromPath("$projectDir/assets/report-template.qmd")
             )
 	}
 }

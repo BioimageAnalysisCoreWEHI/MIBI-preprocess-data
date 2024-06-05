@@ -30,6 +30,8 @@ unwanted_markers = ""
 unwanted_compartments = ""
 unwanted_statistics = " Nucleus: Mean, Nucleus: Median, Nucleus: Min, Nucleus: Max, Nucleus: Std.Dev, Nucleus: Percentile: 91.0, Nucleus: Percentile: 92.0, Nucleus: Percentile: 93.0, Nucleus: Percentile: 94.0, Nucleus: Percentile: 96.0,Nucleus: Percentile: 97.0, Nucleus: Percentile: 98.0, Nucleus: Percentile: 99.0, Nucleus: Percentile: 99.5, Nucleus: Percentile: 99.9, Nucleus: Percentile: 95.0, Nucleus: Percentile: 90.0, Nucleus: Percentile: 80.0, Nucleus: Percentile: 70.0"
 target = "main-cell-type"
+
+summary_output_path = output_folder
 ```
 
 ```{python}
@@ -580,4 +582,60 @@ output_expression_df_path = os.path.join(
     output_folder, "{}_preprocessed_input_data.csv".format(batch_name)
 )
 expression_df.to_csv(output_expression_df_path, index=False)
+```
+
+# Output Paths
+
+**Cell type labels:**
+
+```{python}
+#| label: print-labels-location
+#| output: true
+
+if "fm" in target:
+    print(None)
+else:
+    print(os.path.join(summary_output_path, f"{batch_name}_cell_type_labels.csv"))
+```
+
+**Image list:**
+
+```{python}
+#| label: print-imagelist-location
+#| output: true
+
+print(os.path.join(summary_output_path, f"{batch_name}_images.csv"))
+```
+
+**Decoder:**
+
+```{python}
+#| label: print-decoder-location
+#| output: true
+
+if os.path.exists(os.path.join(output_folder, f"{batch_name}_decoder.json")):
+    print(os.path.join(summary_output_path, f"{batch_name}_decoder.json"))
+else:
+    print(None)
+```
+
+**Preprocessed data:**
+
+```{python}
+#| label: print-output-location
+#| output: true
+
+print(os.path.join(summary_output_path, f"{batch_name}_preprocessed_input_data.csv"))
+```
+
+**Binarized Classification Labels:**
+
+```{python}
+#| label: print-binarizedlabels-location
+#| output: true
+#| 
+if "fm" in target:
+    print(os.path.join(summary_output_path, f"{batch_name}_binarized_labels.csv"))
+else:
+    print(None)
 ```

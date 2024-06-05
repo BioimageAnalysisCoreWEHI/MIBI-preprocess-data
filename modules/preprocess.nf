@@ -9,7 +9,8 @@ process PREPROCESS {
 	conda "${projectDir}/envs/environment.yml"
 	memory "${params.memory}"
 	beforeScript "${params.before_script}"
-	container "oras://ghcr.io/wehi-researchcomputing/mibi:0.1"
+	//container "oras://ghcr.io/wehi-researchcomputing/mibi:0.2"
+	container "oras://ghcr.io/wehi-researchcomputing/mibi:0.2"
 
 	input:
 	val batch_name
@@ -20,69 +21,28 @@ process PREPROCESS {
 	val unwanted_markers
 	val unwanted_compartments
 	val unwanted_statistics
+	path report_template
 
 	output:
 	path ("${batch_name}_report.html")
-	path ("${batch_name}_*_labels.csv")
+	path ("${batch_name}_*_labels.csv") // can either be celltype_labels or binarized_labels
 	path ("${batch_name}_images.csv")
 	path ("${batch_name}_preprocessed_input_data.csv")
 	path ("${batch_name}_decoder.json", optional: true)
-	path ("${batch_name}_binarized_labels.csv", optional: true) // only presen if target=functional-marker
 	
 	shell:
-	flag_a = additional_meta_data == "" ? "" : "-a '${additional_meta_data}'"
-	flag_l = cell_types_to_remove == "" ? "" : "-l '${cell_types_to_remove}'"
-	flag_t = change_to == "" ? "" : "-t '${change_to}'"
-	flag_m = unwanted_markers == "" ? "" : "-m '${unwanted_markers}'"
-	flag_c = unwanted_compartments == "" ? "" : "-c '${unwanted_compartments}'"
-	flag_s = unwanted_statistics == "" ? "" : "-s '${unwanted_statistics}'"
 	'''
-	REPORT_QMD=!{batch_name}_report.qmd
-	mibi-preprocess.py !{params.target} \\
-		-d "$(realpath !{qupath_data})" \\
-		-o "$(realpath .)" \\
-		-n "!{batch_name}" \\
-		!{flag_a} !{flag_l} !{flag_t} !{flag_m} !{flag_m} !{flag_c} !{flag_s} \\
-		> "$REPORT_QMD"
-
-	# add output locations (script has no knowledge of publishDir)
-	echo "" >> "$REPORT_QMD"
-	echo '# Output Paths' >> "$REPORT_QMD"
-	echo "" >> "$REPORT_QMD"
-	echo "**Cell type labels:**" >> "$REPORT_QMD"
-	echo "" >> "$REPORT_QMD"
-	echo "\\`\\`\\`" >> "$REPORT_QMD"
-	echo "!{params.output_folder}/!{batch_name}_cell_type_labels.csv" >> "$REPORT_QMD"
-	echo "\\`\\`\\`" >> "$REPORT_QMD"
-	echo "" >> "$REPORT_QMD"
-	echo "**Image list:**" >> "$REPORT_QMD"
-	echo "" >> "$REPORT_QMD"
-	echo "\\`\\`\\`" >> "$REPORT_QMD"
-	echo "!{params.output_folder}/!{batch_name}_images.csv" >> "$REPORT_QMD"
-	echo "\\`\\`\\`" >> "$REPORT_QMD"
-	echo "" >> "$REPORT_QMD"
-	echo "**Decoder:**" >> "$REPORT_QMD"
-	echo "" >> "$REPORT_QMD"
-	echo "\\`\\`\\`" >> "$REPORT_QMD"
-	[ -f "!{batch_name}_decoder.json" ] && echo "!{params.output_folder}/!{batch_name}_decoder.json" >> "$REPORT_QMD" || echo "None" >> "$REPORT_QMD"
-	echo "\\`\\`\\`" >> "$REPORT_QMD"
-	echo "" >> "$REPORT_QMD"
-	echo "**Preprocessed data:**" >> "$REPORT_QMD"
-	echo "" >> "$REPORT_QMD"
-	echo "\\`\\`\\`" >> "$REPORT_QMD"
-	echo "!{params.output_folder}/!{batch_name}_preprocessed_input_data.csv" >> "$REPORT_QMD"
-	echo "\\`\\`\\`" >> "$REPORT_QMD"
-	echo "" >> "$REPORT_QMD"
-	if [[ "!{params.target}" == "fm"* ]]
-	then
-		echo "**Binarized Classification Labels:**" >> "$REPORT_QMD"
-		echo "" >> "$REPORT_QMD"
-		echo "\\`\\`\\`" >> "$REPORT_QMD"
-		echo "!{params.output_folder}/!{batch_name}_binarized_labels.csv" >> "$REPORT_QMD"
-		echo "\\`\\`\\`" >> "$REPORT_QMD"
-		echo "" >> "$REPORT_QMD"
-	fi
-
-	quarto render "$REPORT_QMD" --to html
+	quarto render "!{report_template}" \\
+		-o !{batch_name}_report.html \\
+		-P target:!{params.target} \\
+		-P qupath_data:"$(realpath !{qupath_data})" \\
+		-P output_folder:"$(realpath .)" \\
+		-P batch_name:"!{batch_name}" \\
+		-P additional_metadata_to_keep:"!{additional_meta_data}" \\
+		-P unwanted_celltypes:"!{cell_types_to_remove}" \\
+		-P change_unwanted_celltypes_to:"!{change_to}" \\
+		-P unwanted_markers:"\\"!{unwanted_markers}\\"" \\
+		-P unwanted_compartments:"\\"!{unwanted_compartments}\\"" \\
+		-P unwanted_statistics:"\\"!{unwanted_statistics}\\""
 	'''
 }
