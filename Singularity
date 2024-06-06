@@ -24,6 +24,7 @@ from: mambaorg/micromamba:1.5.8-bookworm-slim
   Author yang.e@wehi.edu.au
   Version v0.1
   XGBOOST_VERSION 1.6.2
+  MICROMAMBA_VERSION 1.5.8
 
 %help
   This container is used in the MIBI pipeline to preprocess training data,
