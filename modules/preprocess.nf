@@ -9,7 +9,6 @@ process PREPROCESS {
 	conda "${projectDir}/envs/environment.yml"
 	memory "${params.memory}"
 	beforeScript "${params.before_script}"
-	//container "oras://ghcr.io/wehi-researchcomputing/mibi:0.2"
 	container "oras://ghcr.io/wehi-researchcomputing/mibi:0.2"
 
 	input:
