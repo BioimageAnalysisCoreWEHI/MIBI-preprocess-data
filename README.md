@@ -118,11 +118,22 @@ optional arguments:
 Download and unzip example input from [here](https://github.com/BioimageAnalysisCoreWEHI/MIBI/blob/main/annotationsTest.csv.zip)
 
 ```
-nextflow run main.nf --batch_name test --target main-cell-type --output_folder ../mibi-test-run-output --input_data annotationsTest.csv --cell_types_to_remove "Unknown" --change_to Other --unwanted_markers dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum
+nextflow run main.nf \
+    --batch_name test \
+    --target main-cell-type \
+    --output_folder /tmp/mibi-test-run-output \
+    --input_data annotationsTest.csv \
+    --cell_types_to_remove Unknown \
+    --change_to Other \
+    --unwanted_markers dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum
 
 # Using default values, equivalent to
 
-nextflow run main.nf --batch_name test --output_folder /tmp/mibi-test-run-output --input_data annotationsTest.csv --unwanted_markers dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum
+nextflow run main.nf \
+    --batch_name test \
+    --output_folder /tmp/mibi-test-run-output \
+    --input_data annotationsTest.csv \
+    --unwanted_markers dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum
 ```
 
 Outputs will be located in `/tmp/mibi-test-run-output`.
