@@ -75,11 +75,15 @@
                     "default": "8 GB",
                     "hidden": true,
                     "description": "How much memory to use for preprocessing. Increase this if your jobs are killed due to Out of Memory. E.g., \"3 GB\""
+                },
+                "cpus": {
+                    "type": "integer",
+                    "default": 1,
+                    "hidden": true,
+                    "description": "Number of CPUs to use for preprocessing."
                 }
             },
             "required": [
-                "memory",
-                "cpus",
                 "batch_name",
                 "input_data",
                 "output_folder",
