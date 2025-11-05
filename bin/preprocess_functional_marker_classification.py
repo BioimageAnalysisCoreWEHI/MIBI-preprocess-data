@@ -185,7 +185,7 @@ def setup(output_folder, expression_mat_path):
     return expression_df
 
 
-def binarize_and_save_fm(expression_df, output_folder, batch_name) -> tuple:
+def binarize_and_save_fm(expression_df, output_folder, batch_name, output_format='csv') -> tuple:
     """
     Converts +/- to 1/0 in the Classification column (representing functional marker of interest).
     """
@@ -203,8 +203,12 @@ def binarize_and_save_fm(expression_df, output_folder, batch_name) -> tuple:
     # replace "+" with 1, otherwise, 0.
     binarized = binarized.map(lambda x: int("+" in x))
 
-    filename = os.path.join(output_folder, f"{batch_name}_binarized_labels.csv")
-    binarized.to_csv(filename, index=False)
+    if output_format == 'parquet':
+        filename = os.path.join(output_folder, f"{batch_name}_binarized_labels.parquet")
+        binarized.to_frame(name="Classification").to_parquet(filename, index=False)
+    else:
+        filename = os.path.join(output_folder, f"{batch_name}_binarized_labels.csv")
+        binarized.to_csv(filename, index=False)
 
     return encoder, decoder
 
@@ -308,7 +312,7 @@ def preprocess_training_data(
     output_mibi_reporter.found_cell_types_table = list_2_md_table(found_cell_types)
     output_mibi_reporter.cell_types_table = list_2_md_table(cell_types)
 
-    encoder, decoder = binarize_and_save_fm(expression_df, output_folder, batch_name)
+    encoder, decoder = binarize_and_save_fm(expression_df, output_folder, batch_name, output_format)
 
     output_mibi_reporter.encoding_table = tabulate.tabulate(encoder.items())
 
@@ -319,7 +323,7 @@ def preprocess_training_data(
     expression_df = convert_pixels_to_micrometre(expression_df)
 
     save_image_coordinate_columns(
-        expression_df, additional_meta_data_to_keep, output_folder, batch_name
+        expression_df, additional_meta_data_to_keep, output_folder, batch_name, output_format
     )
 
     output_mibi_reporter.cell_type_count_table = (

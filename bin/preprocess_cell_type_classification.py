@@ -330,15 +330,20 @@ def create_encoder_decoder(cell_types, output_folder, batch_name):
     return encoder, decoder
 
 
-def save_encoded_labels(expression_df, encoder, output_folder, batch_name):
+def save_encoded_labels(expression_df, encoder, output_folder, batch_name, output_format='csv'):
     """
-    Save the labels as a separate csv file. The labels will be encoded with the above encoding
+    Save the labels as a separate CSV or Parquet file. The labels will be encoded with the above encoding
     """
 
-    filename = os.path.join(output_folder, "{}_cell_type_labels.csv".format(batch_name))
     labels = expression_df.loc[:, ["Name"]]
     labels = labels.replace({"Name": encoder})
-    labels.to_csv(filename, index=False)
+    
+    if output_format == 'parquet':
+        filename = os.path.join(output_folder, "{}_cell_type_labels.parquet".format(batch_name))
+        labels.to_parquet(filename, index=False)
+    else:
+        filename = os.path.join(output_folder, "{}_cell_type_labels.csv".format(batch_name))
+        labels.to_csv(filename, index=False)
 
 
 def convert_pixels_to_micrometre(expression_df, pixel_size=0.3906):
@@ -384,7 +389,7 @@ def convert_pixels_to_micrometre(expression_df, pixel_size=0.3906):
 
 
 def save_image_coordinate_columns(
-    expression_df, additional_meta_data, output_folder, batch_name
+    expression_df, additional_meta_data, output_folder, batch_name, output_format='csv'
 ):
     """
     Save the image and coordinate columns. This is for when we want to import the results back into qupath
@@ -396,10 +401,17 @@ def save_image_coordinate_columns(
         "Centroid Y µm",
     ] + additional_meta_data
     image_coord_df = expression_df.loc[:, image_coord_cols]
-    image_coord_file_name = os.path.join(
-        output_folder, "{}_images.csv".format(batch_name)
-    )
-    image_coord_df.to_csv(image_coord_file_name, index=False)
+    
+    if output_format == 'parquet':
+        image_coord_file_name = os.path.join(
+            output_folder, "{}_images.parquet".format(batch_name)
+        )
+        image_coord_df.to_parquet(image_coord_file_name, index=False)
+    else:
+        image_coord_file_name = os.path.join(
+            output_folder, "{}_images.csv".format(batch_name)
+        )
+        image_coord_df.to_csv(image_coord_file_name, index=False)
 
 
 def remove_prefixes_underscores(expression_df):
@@ -607,12 +619,12 @@ def preprocess_training_data(
         decoder = None
         output_mibi_reporter.encoding_table = list_2_md_table(None)
 
-    save_encoded_labels(expression_df, encoder, output_folder, batch_name)
+    save_encoded_labels(expression_df, encoder, output_folder, batch_name, output_format)
 
     expression_df = convert_pixels_to_micrometre(expression_df)
 
     save_image_coordinate_columns(
-        expression_df, additional_meta_data_to_keep, output_folder, batch_name
+        expression_df, additional_meta_data_to_keep, output_folder, batch_name, output_format
     )
 
     output_mibi_reporter.cell_type_count_table = (

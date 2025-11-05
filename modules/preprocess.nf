@@ -25,11 +25,11 @@ process PREPROCESS {
 
 	output:
 	path ("${batch_name}_report.html")
-	path ("${batch_name}_*_labels.csv")
-	path ("${batch_name}_images.csv")
+	path ("${batch_name}_*_labels.{csv,parquet}")
+	path ("${batch_name}_images.{csv,parquet}")
 	path ("${batch_name}_preprocessed_input_data.{csv,parquet}")
 	path ("${batch_name}_decoder.json", optional: true)
-	path ("${batch_name}_binarized_labels.csv", optional: true) // only presen if target=functional-marker
+	path ("${batch_name}_binarized_labels.{csv,parquet}", optional: true) // only presen if target=functional-marker
 	
 	shell:
 	flag_a = additional_meta_data == "" ? "" : "-a '${additional_meta_data}'"
@@ -55,13 +55,21 @@ process PREPROCESS {
 	echo "**Cell type labels:**" >> "$REPORT_QMD"
 	echo "" >> "$REPORT_QMD"
 	echo "\\`\\`\\`" >> "$REPORT_QMD"
-	echo "!{params.output_folder}/!{batch_name}_cell_type_labels.csv" >> "$REPORT_QMD"
+	if [ "!{params.output_format}" == "parquet" ]; then
+		echo "!{params.output_folder}/!{batch_name}_cell_type_labels.parquet" >> "$REPORT_QMD"
+	else
+		echo "!{params.output_folder}/!{batch_name}_cell_type_labels.csv" >> "$REPORT_QMD"
+	fi
 	echo "\\`\\`\\`" >> "$REPORT_QMD"
 	echo "" >> "$REPORT_QMD"
 	echo "**Image list:**" >> "$REPORT_QMD"
 	echo "" >> "$REPORT_QMD"
 	echo "\\`\\`\\`" >> "$REPORT_QMD"
-	echo "!{params.output_folder}/!{batch_name}_images.csv" >> "$REPORT_QMD"
+	if [ "!{params.output_format}" == "parquet" ]; then
+		echo "!{params.output_folder}/!{batch_name}_images.parquet" >> "$REPORT_QMD"
+	else
+		echo "!{params.output_folder}/!{batch_name}_images.csv" >> "$REPORT_QMD"
+	fi
 	echo "\\`\\`\\`" >> "$REPORT_QMD"
 	echo "" >> "$REPORT_QMD"
 	echo "**Decoder:**" >> "$REPORT_QMD"
@@ -85,7 +93,11 @@ process PREPROCESS {
 		echo "**Binarized Classification Labels:**" >> "$REPORT_QMD"
 		echo "" >> "$REPORT_QMD"
 		echo "\\`\\`\\`" >> "$REPORT_QMD"
-		echo "!{params.output_folder}/!{batch_name}_binarized_labels.csv" >> "$REPORT_QMD"
+		if [ "!{params.output_format}" == "parquet" ]; then
+			echo "!{params.output_folder}/!{batch_name}_binarized_labels.parquet" >> "$REPORT_QMD"
+		else
+			echo "!{params.output_folder}/!{batch_name}_binarized_labels.csv" >> "$REPORT_QMD"
+		fi
 		echo "\\`\\`\\`" >> "$REPORT_QMD"
 		echo "" >> "$REPORT_QMD"
 	fi
