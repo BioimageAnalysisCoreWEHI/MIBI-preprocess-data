@@ -62,6 +62,9 @@ Parameters:
   --unwanted_statistics UNWANTED_STATISTICS
         A comma-delimited list of statistics you want to remove from the 
         phenotyping.
+  --output_format
+        Output file format. Options: "csv" (default) or "parquet". Parquet 
+        format provides better compression and faster I/O for large datasets.
   --memory
         The RAM to allocate for the preprocessing. Include units e.g. "2 GB"
   --before_script
@@ -99,6 +102,8 @@ optional arguments:
                         Where preprocessed files will be stored. The folder will be created if it doesn't already exist.
   -d QUPATH_DATA, --qupath-data QUPATH_DATA
                         The raw data exported from QuPath to be preprocessed.
+  -f {csv,parquet}, --output-format {csv,parquet}
+                        Output file format. Default: csv. Parquet provides better compression and faster I/O.
   -a ADDITIONAL_METADATA_TO_KEEP, --additional-metadata-to-keep ADDITIONAL_METADATA_TO_KEEP
                         A comma-delimited list of additional metadata columns you wish to keep.
   -l UNWANTED_CELLTYPES, --unwanted-celltypes UNWANTED_CELLTYPES
@@ -134,6 +139,16 @@ nextflow run main.nf \
     --output_folder /tmp/mibi-test-run-output \
     --input_data annotationsTest.csv \
     --unwanted_markers dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum
+
+# To output in Parquet format (recommended for large datasets)
+
+nextflow run main.nf \
+    --batch_name test \
+    --target main-cell-type \
+    --output_folder /tmp/mibi-test-run-output \
+    --input_data annotationsTest.csv \
+    --output_format parquet \
+    --unwanted_markers dsDNA,Beta-Tubulin,CD39,CD49a,Tantalum
 ```
 
 Outputs will be located in `/tmp/mibi-test-run-output`.
@@ -143,13 +158,15 @@ Outputs will be located in `/tmp/mibi-test-run-output`.
 The pipeline will produce an HTML report which you can view in your browser. This report povides detailed information for you to
 inspect. This report is named `report.html` and is saved in the directory as specified by `--output_folder`.
 
-The pipeline will also produce 4 files:
+The pipeline will also produce 4 or 5 files:
 
-* `<batch name>_preprocessed_input_data.csv` - the fully pre-processed results.
-* `<batch name>_cell_type_labels.csv` - the integer cell type label corresponding to each row of the preprocessed data CSV.
+* `<batch name>_preprocessed_input_data.[csv|parquet]` - the fully pre-processed results.
+* `<batch name>_cell_type_labels.[csv|parquet]` - the integer cell type label corresponding to each row of the preprocessed data.
 * `<batch name>_decoder.json` - the dictionary to convert cell type integer values back to the text labels. This won't be produced when preprocessing training data i.e., when the `CLASS` column is empty.
-* `<batch name>_images.csv` - the image file and centroid coordinates associated with each cell obvservation.
-* `<batch name>_binarized_labels.csv` - Classifications converted to 1/0 based on +/- (only if using `fm-*` targets).
+* `<batch name>_images.[csv|parquet]` - the image file and centroid coordinates associated with each cell obvservation.
+* `<batch name>_binarized_labels.[csv|parquet]` - Classifications converted to 1/0 based on +/- (only if using `fm-*` targets).
+
+**Note:** The file extension (`.csv` or `.parquet`) depends on the `--output_format` parameter. Parquet format is recommended for large datasets as it provides better compression and faster I/O performance.
 
 If using the Python script directly, the same 4 output files are produced, but the report is printed to the terminal in markdown
 format. This can be rendered by quarto, if so desired (but not strictly necessary).
